@@ -175,44 +175,8 @@ function handleAccountScreenshot(e){
       preview.classList.remove("hidden");
     };
     image.src=ev.target.result;
-  };
+    
   reader.readAsDataURL(file);
-}
-let profileShotData="";
-document.getElementById("profileShot").addEventListener("change", function(){
-  const file=this.files[0];
-  profileShotData="";
-  document.getElementById("sm").className="";
-  document.getElementById("sm").textContent="";
-  shotPreview.classList.add("hidden");
-  if(!file)return;
-  if(file.size>5*1024*1024){
-    this.value="";
-    sm.className="error";
-    sm.textContent="Screenshot must be 5 MB or smaller.";
-    return;
-  }
-  const reader=new FileReader();
-  reader.onload=function(e){
-    const img=new Image();
-    img.onload=function(){
-      const maxW=900;
-      const scale=Math.min(1,maxW/img.width);
-      const canvas=document.createElement("canvas");
-      canvas.width=Math.max(1,Math.round(img.width*scale));
-      canvas.height=Math.max(1,Math.round(img.height*scale));
-      const ctx=canvas.getContext("2d");
-      ctx.drawImage(img,0,0,canvas.width,canvas.height);
-      profileShotData=canvas.toDataURL("image/jpeg",0.72);
-      document.getElementById("sm").className="ok";
-      document.getElementById("sm").textContent="Screenshot ready. You can submit now.";
-      document.getElementById("shotImg").src=profileShotData;
-      shotPreview.classList.remove("hidden");
-    };
-    img.src=e.target.result;
-  };
-  reader.readAsDataURL(file);
-});
 
 function submitA(){
   const smEl=document.getElementById("sm");
