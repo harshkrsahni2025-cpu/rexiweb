@@ -1,6 +1,41 @@
-
+const SUPABASE_URL = "https://xbehdmcbssympdeduple.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_RgXfLDwd2xzVyb18Mz5o5w_rEVwzBiL";
 let keys=JSON.parse(localStorage.getItem("rx4signupKeys")||'null')||["REXI1002","REXI2863","REXI0199","REXI2752","REXI1551","REXI1092","REXI2070","REXI1436","REXI7155","REXI4277"];
 let users=JSON.parse(localStorage.getItem("rx4u")||"{}");
+async function loadUsersFromSupabase(){
+  if(!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) return;
+
+  try{
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/users?select=*`,
+      {
+        headers:{
+          "apikey": SUPABASE_PUBLISHABLE_KEY,
+          "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`
+        }
+      }
+    );
+
+    if(!res.ok) throw new Error("Supabase request failed");
+
+    const rows = await res.json();
+
+    rows.forEach(row=>{
+      if(row.username){
+        users[row.username] = {
+          ...(row.data || {}),
+          username: row.username,
+          email: row.email || "",
+          name: row.name || "",
+          balance: Number(row.balance || 0),
+          status: row.status || "active"
+        };
+      }
+    });
+  }catch(err){
+    console.error("Supabase users load error:", err);
+  }
+}
 let rates=JSON.parse(localStorage.getItem("rx4r")||'{"s":15,"f":20,"t":25}');
 let session=localStorage.getItem("rx4s"),chosen=null;
 let usedKeys=JSON.parse(localStorage.getItem("rx4usedKeys")||"{}"),rx4news=JSON.parse(localStorage.getItem("rx4news")||"[]");
@@ -23,8 +58,40 @@ function save(){
     return false;
   }
 }
+async function saveUserToSupabase(username, userData){
+  if(!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) return;
+
+  try{
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/users`,
+      {
+        method:"POST",
+        headers:{
+          "apikey":SUPABASE_PUBLISHABLE_KEY,
+          "Authorization":`Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+          "Content-Type":"application/json",
+          "Prefer":"return=minimal"
+        },
+        body:JSON.stringify({
+          username:username,
+          email:userData.email || "",
+          name:userData.name || "",
+          balance:Number(userData.balance || 0),
+          status:"active",
+          data:userData
+        })
+      }
+    );
+
+    if(!res.ok){
+      console.error("Supabase save failed:", await res.text());
+    }
+  }catch(err){
+    console.error("Supabase connection error:",err);
+  }
+}
 function authTab(n){loginBox.classList.toggle("hidden",n!=1);signupBox.classList.toggle("hidden",n!=2);document.querySelectorAll(".tab").forEach((x,i)=>x.classList.toggle("active",i==n-1))}
-function signup(){
+async function signup(){
 se.textContent="";
 let u=su.value.trim(),p=sp.value,k=sk.value.trim(),r=rc.value.trim();
 if(!u||!p||!k)return se.textContent="Please fill all required fields";
@@ -36,6 +103,7 @@ const referralBonus=r?Number(referralCodes[r])||0:0;
 users[u]={password:p,signupKey:k,balance:referralBonus,bonus:referralBonus,referralCode:r||"",approved:0,subs:[],withdrawals:[]};
 usedKeys[k]=true;
 if(!save())return;
+await saveUserToSupabase(u, users[u]);
 localStorage.setItem("rx4usedKeys",JSON.stringify(usedKeys));
 session=u;localStorage.setItem("rx4s",u);open()
 }
@@ -359,4 +427,6 @@ function refresh(){
   mine.innerHTML=(u.subs||[]).map(s=>`<div class="row"><span>${escapeHtml(s.pkg)}<br><small>${escapeHtml(s.gmail)}<br>${escapeHtml(s.name)}</small></span><span class="status">${escapeHtml(s.status)}</span></div>`).join("")||"No submissions yet.";
   renderNews();
 }
-if(session)open();
+if(session){
+  loadUsersFromSupabase().then(()=>open());
+}
