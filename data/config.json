@@ -1,0 +1,22 @@
+{
+  "signupKeys": [
+    "REXI1002",
+    "REXI2863",
+    "REXI0199",
+    "REXI2752",
+    "REXI1551",
+    "REXI1092",
+    "REXI2070",
+    "REXI1436",
+    "REXI7155",
+    "REXI4277"
+  ],
+  "referralCodes": {
+    "REXI0909": 10
+  },
+  "rates": {
+    "single": 15,
+    "fiveAccounts": 20,
+    "tenAccounts": 25
+  }
+}
