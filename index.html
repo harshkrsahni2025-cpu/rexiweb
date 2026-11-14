@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>REXI WEB</title>
+
+<link href="css/style.css" rel="stylesheet"/></head>
+<body>
+<div class="auth" id="auth">
+<div class="authbox">
+<div class="logo">REXI WEB ✨</div><div class="muted">Employee dashboard</div>
+<div class="tabs"><button class="tab active" onclick="authTab(1)">LOGIN</button><button class="tab" onclick="authTab(2)">SIGN UP</button></div>
+<div id="loginBox">
+<label>Username</label><input class="input" id="lu"/>
+<label>Password</label><input class="input" id="lp" type="password"/>
+<div class="error" id="le"></div><button class="btn full" onclick="login()">LOGIN</button>
+</div>
+<div class="hidden" id="signupBox">
+<label>Username</label><input class="input" id="su"/>
+<label>Password</label><input class="input" id="sp" type="password"/>
+<label>Valid Signup Key</label><input class="input" id="sk"/>
+<label>Referral Code (optional)</label><input class="input" id="rc"/>
+<div class="error" id="se"></div><button class="btn full" onclick="signup()">CREATE ACCOUNT ✨</button>
+</div>
+</div>
+</div>
+<div class="app hidden" id="app">
+<div class="top"><div class="logo">REXI WEB</div><div class="muted">Account work dashboard</div></div>
+<section class="page active" id="dashboard">
+<div class="card"><div class="muted">Facebook Account Rate</div><div class="rate" id="rate">₹15 / account</div></div>
+<div class="card"><h3>📢 News</h3><div id="news">Welcome to REXI WEB. Check rates before submitting.</div></div>
+<div class="card"><h3>📣 Join Our Channel</h3><p class="muted">Work updates and announcements.</p><a href="https://t.me/wslinkmohit" target="_blank"><button class="btn">JOIN CHANNEL</button></a></div>
+<div class="card"><div class="muted">Wallet Balance</div><div class="rate" id="dbal">₹0</div></div>
+</section>
+<section class="page" id="submission">
+<div class="card"><h2>Account Submission</h2>
+<div class="option"><b>Single Account</b><div class="price">₹15 / account</div><button class="btn" onclick="choose('Single Account',15)">SUBMIT</button></div>
+<div class="option"><b>5 Accounts</b><div class="price">₹20 / account</div><button class="btn" onclick="choose('5 Accounts',20)">SUBMIT</button></div>
+<div class="option"><b>10 Accounts</b><div class="price">₹25 / account</div><button class="btn" onclick="choose('10 Accounts',25)">SUBMIT</button></div>
+</div>
+<div class="card hidden" id="form">
+<h3 id="pkg"></h3>
+<div id="accountFields"></div>
+<p class="muted">For each account, enter only the requested non-sensitive details. The REXI verification password is a separate REXI password; do not enter a Facebook, Gmail, 2FA, or recovery secret.</p>
+<label><input id="confirm" style="width:auto;margin-right:7px" type="checkbox"/> I confirm these are my own/authorized accounts.</label>
+<button class="btn full" onclick="submitA()" style="margin-top:15px">SUBMIT ACCOUNT(S)</button>
+<div id="sm"></div>
+</div>
+<div class="card"><h3>My Submissions</h3><div id="mine"></div></div>
+</section>
+<section class="page" id="wallet">
+<div class="card"><div class="muted">Available Balance</div><div class="rate" id="wbal">₹0</div></div>
+<div class="card"><h3>Withdraw via UPI</h3><label>UPI ID</label><input class="input" id="upi"/>
+<label>Amount (minimum ₹20)</label><input class="input" id="amt" type="number"/>
+<button class="btn full" onclick="withdraw()">REQUEST WITHDRAWAL</button><div id="wm"></div></div>
+</section>
+<section class="page" id="profile"><div class="card"><h2>Profile</h2>
+<div class="row"><span>Username</span><b id="pn"></b></div>
+<div class="row"><span>Referral Bonus</span><b id="pb"></b></div>
+<div class="row"><span>Approved Accounts</span><b id="pa"></b></div>
+<button class="btn full" onclick="logout()">LOGOUT</button>
+<div id="lom"></div>
+</div></section>
+<section class="page" id="admin">
+<div class="card"><h2>Admin Panel</h2>
+<div class="row"><span>Users</span><b id="uc">0</b></div>
+<div class="row"><span>Pending Submissions</span><b id="pc">0</b></div>
+<div class="row"><span>Published News</span><b id="nc">0</b></div>
+</div>
+<div class="admin-tabs">
+<button class="admin-tab active" onclick="adminTab('ausers',this)">Users</button>
+<button class="admin-tab" onclick="adminTab('asubs',this)">Submissions</button>
+<button class="admin-tab" onclick="adminTab('awallet',this)">Wallets</button>
+<button class="admin-tab" onclick="adminTab('anews',this)">News</button>
+<button class="admin-tab" onclick="adminTab('arates',this)">Rates</button>
+<button class="admin-tab" onclick="adminTab('akeys',this)">Signup Keys</button>
+<button class="admin-tab" onclick="adminTab('atrans',this)">Transactions</button>
+</div>
+<div class="admin-section active" id="ausers">
+<div class="card"><h3>Users</h3><div id="userList"></div></div>
+</div>
+<div class="admin-section" id="asubs">
+<div class="card"><h3>Submitted Accounts</h3><div id="as"></div></div>
+</div>
+<div class="admin-section" id="awallet">
+<div class="card"><h3>Manage User Wallet</h3>
+<label>User</label><select class="input" id="walletUser"></select>
+<label>Amount</label><input class="input" id="walletAmount" min="1" placeholder="Enter amount" type="number"/>
+<label>Reason (optional)</label><input class="input" id="walletReason" placeholder="e.g. Manual bonus / correction"/>
+<div class="admin-actions"><button class="btn success" onclick="adjustWallet(1)">ADD MONEY</button><button class="btn danger" onclick="adjustWallet(-1)">REMOVE MONEY</button></div>
+<div id="walletMsg"></div></div>
+</div>
+<div class="admin-section" id="anews">
+<div class="card"><h3>Add / Edit News</h3>
+<input id="newsEditId" type="hidden"/>
+<label>Message</label><textarea class="input textarea" id="newsMessage" placeholder="Write news / announcement"></textarea>
+<label>Link (optional)</label><input class="input" id="newsLink" placeholder="https://example.com" type="url"/>
+<label>Video (optional)</label><input class="input" id="newsVideo" placeholder="https://... video URL" type="url"/>
+<div class="admin-actions"><button class="btn" onclick="saveNews()">SAVE NEWS</button><button class="btn secondary" onclick="clearNewsForm()">CLEAR</button></div>
+<div id="newsMsg"></div></div>
+<div class="card"><h3>Published News</h3><div id="newsList"></div></div>
+</div>
+<div class="admin-section" id="arates">
+<div class="card"><h3>Rates</h3>
+<label>Single / account</label><input class="input" id="r1" min="0" type="number"/>
+<label>5 accounts / account</label><input class="input" id="r5" min="0" type="number"/>
+<label>10 accounts / account</label><input class="input" id="r10" min="0" type="number"/>
+<button class="btn" onclick="saveRates()">SAVE RATES</button><div id="rateMsg"></div></div>
+</div>
+<div class="admin-section" id="akeys">
+<div class="card"><h3>Manage Signup Keys</h3>
+<label>Add New Key</label>
+<input class="input" id="newSignupKey" placeholder="e.g. REXI5001"/>
+<div class="admin-actions"><button class="btn success" onclick="addSignupKey()">ADD KEY</button></div>
+<div id="keyMsg"></div>
+</div>
+<div class="card"><h3>Signup Key Status</h3><div id="signupKeyList"></div></div>
+<div class="card"><h3>Manage Referral Codes</h3>
+<label>Referral Code</label>
+<input class="input" id="newReferralCode" placeholder="e.g. REXI2027"/>
+<label>Bonus Amount (₹)</label>
+<input class="input" id="newReferralAmount" min="0" placeholder="e.g. 10" type="number"/>
+<div class="admin-actions"><button class="btn success" onclick="addReferralCode()">ADD / UPDATE CODE</button></div>
+<div id="referralMsg"></div>
+</div>
+<div class="card"><h3>Referral Code Status</h3><div id="referralCodeList"></div></div>
+</div>
+<div class="admin-section" id="atrans">
+<div class="card"><h3>Money Transactions</h3><div id="adminTransactions"></div></div>
+</div>
+</section>
+<div class="bottom">
+<button class="nav active" onclick="go('dashboard',this)"><span>⌂</span>Dashboard</button>
+<button class="nav" onclick="go('submission',this)"><span>▣</span>Submission</button>
+<button class="nav" onclick="go('wallet',this)"><span>₹</span>Wallet</button>
+<button class="nav" onclick="go('profile',this)"><span>●</span>Profile</button>
+<button class="nav hidden" id="at" onclick="go('admin',this)"><span>⚙</span>Admin</button>
+</div>
+</div>
+
+<script src="js/app.js"></script></body>
+</html>
